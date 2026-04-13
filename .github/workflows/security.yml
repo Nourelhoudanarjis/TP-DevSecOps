@@ -1,0 +1,23 @@
+name: "Pipeline DevSecOps - SAST + DAST"
+on:
+  push:
+    branches: [ "main" ]   # Se declenche a chaque git push
+jobs:
+  sast-semgrep:
+    name: "SAST - Semgrep"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Scan Semgrep OWASP Top 10"
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: "p/owasp-top-ten p/php"
+  dast-zap:
+    name: "DAST - OWASP ZAP"
+    runs-on: ubuntu-latest
+    needs: sast-semgrep
+    steps:
+      - name: "Scan ZAP baseline"
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: "http://votre-app-staging.com"
